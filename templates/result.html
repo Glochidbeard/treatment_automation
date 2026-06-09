@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-Emergent List — Results</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f0f4f0;
+    min-height: 100vh;
+    padding: 2rem;
+    color: #1a2e1a;
+  }
+
+  .page-header {
+    max-width: 1100px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .page-header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    flex: 1;
+  }
+
+  .meta {
+    font-size: 0.82rem;
+    color: #6b7a6b;
+    background: #e8f0e8;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+  }
+
+  .toolbar {
+    max-width: 1100px;
+    margin: 0 auto 1rem;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn {
+    padding: 0.55rem 1.1rem;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, opacity .15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .btn-primary { background: #2d6a2d; color: #fff; }
+  .btn-primary:hover { background: #1e4e1e; }
+  .btn-secondary { background: #e8f0e8; color: #2d6a2d; }
+  .btn-secondary:hover { background: #d0e4d0; }
+  .btn-ghost { background: transparent; color: #6b7a6b; border: 1px solid #c5d5c5; }
+  .btn-ghost:hover { background: #f0f4f0; }
+
+  .spacer { flex: 1; }
+
+  .row-count {
+    font-size: 0.85rem;
+    color: #6b7a6b;
+    align-self: center;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    max-width: 1100px;
+    margin: 0 auto 1.5rem;
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e8f0e8;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .card-header h2 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .badge {
+    background: #e8f0e8;
+    color: #2d6a2d;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+  }
+
+  .badge-warn {
+    background: #fff7e0;
+    color: #9a6a00;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  thead th {
+    background: #f7faf7;
+    padding: 0.65rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #5a7a5a;
+    border-bottom: 1px solid #e8f0e8;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #f0f4f0;
+    transition: background .1s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f7faf7; }
+
+  td {
+    padding: 0.6rem 1rem;
+    vertical-align: middle;
+  }
+
+  td.location { font-family: monospace; font-size: 0.82rem; color: #3a5a3a; }
+  td.species { font-style: italic; }
+  td.week { font-family: monospace; font-weight: 600; color: #4a7a4a; }
+  td.qty { font-weight: 600; }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    color: #c5a5a5;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0.2rem 0.4rem;
+    border-radius: 5px;
+    transition: color .15s, background .15s;
+  }
+
+  .remove-btn:hover { color: #cc3333; background: #fff0f0; }
+
+  .restore-btn {
+    background: none;
+    border: 1px solid #a8c5a8;
+    color: #4a7a4a;
+    cursor: pointer;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 5px;
+    transition: background .15s;
+  }
+
+  .restore-btn:hover { background: #e8f5e8; }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #8a9a8a;
+    font-size: 0.9rem;
+  }
+
+  details { max-width: 1100px; margin: 0 auto 1.5rem; }
+
+  summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #6b7a6b;
+    padding: 0.5rem 0;
+    user-select: none;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+
+  summary::before {
+    content: '▶';
+    font-size: 0.7rem;
+    transition: transform .2s;
+    display: inline-block;
+  }
+
+  details[open] summary::before { transform: rotate(90deg); }
+
+  .warnings {
+    max-width: 1100px;
+    margin: 0 auto 1rem;
+    padding: 0.75rem 1rem;
+    background: #fff7e0;
+    border: 1px solid #f0d070;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: #7a5a00;
+  }
+
+  .warnings ul { padding-left: 1.25rem; }
+  .warnings li { margin-top: 0.25rem; }
+
+  .no-rows-msg {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+    color: #8a9a8a;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🌿 Pre-Emergent Application List</h1>
+  <span class="meta">{{ filename }}</span>
+  <span class="meta">{{ current_week }} &nbsp;·&nbsp; showing back to {{ cutoff_week }}</span>
+  {% if total_time %}
+  <span class="meta">🗺 ~{{ total_time }} min route</span>
+  {% endif %}
+</div>
+
+{% if opt_errors %}
+<div class="warnings">
+  <strong>Route optimizer warnings:</strong>
+  <ul>
+    {% for e in opt_errors %}<li>{{ e }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<div class="toolbar">
+  <a href="/" class="btn btn-ghost">← New upload</a>
+  <span class="spacer"></span>
+  <span class="row-count" id="row-count"></span>
+  <button class="btn btn-secondary" id="restore-all-btn" onclick="restoreAll()" style="display:none">↩ Restore all</button>
+  <button class="btn btn-primary" onclick="exportCSV()">⬇ Export CSV</button>
+</div>
+
+<!-- Main table -->
+<div class="card">
+  <div class="card-header">
+    <h2>Application List</h2>
+    <span class="badge" id="main-badge">{{ main_rows|length }}</span>
+  </div>
+  <table id="main-table">
+    <thead>
+      <tr>
+        <th>Location</th>
+        <th>Species</th>
+        <th>Size</th>
+        <th>Qty</th>
+        <th>Week Shifted</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="main-tbody">
+      {% for row in main_rows %}
+      <tr data-location="{{ row.location }}"
+          data-species="{{ row.species }}"
+          data-size="{{ row.size }}"
+          data-qty="{{ row.qty }}"
+          data-week="{{ row.week_shifted }}">
+        <td class="location">{{ row.location }}</td>
+        <td class="species">{{ row.species }}</td>
+        <td>{{ row.size }}</td>
+        <td class="qty">{{ row.qty }}</td>
+        <td class="week">{{ row.week_shifted }}</td>
+        <td><button class="remove-btn" title="Remove row" onclick="removeRow(this)">✕</button></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="no-rows-msg" id="main-empty">No rows in list. Restore rows from below or upload a new file.</div>
+</div>
+
+<!-- Removed rows staging area -->
+<div class="card" id="removed-card" style="display:none">
+  <div class="card-header">
+    <h2>Removed rows</h2>
+    <span class="badge badge-warn" id="removed-badge">0</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Location</th>
+        <th>Species</th>
+        <th>Size</th>
+        <th>Qty</th>
+        <th>Week Shifted</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="removed-tbody"></tbody>
+  </table>
+</div>
+
+<!-- Extra rows (out of window / excluded by size) -->
+{% if extra_rows %}
+<details>
+  <summary>
+    Additional items (outside 3-week window or excluded by size)
+    <span class="badge">{{ extra_rows|length }}</span>
+  </summary>
+  <div class="card" style="margin-top:.75rem">
+    <table>
+      <thead>
+        <tr>
+          <th>Location</th>
+          <th>Species</th>
+          <th>Size</th>
+          <th>Qty</th>
+          <th>Week Shifted</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="extra-tbody">
+        {% for row in extra_rows %}
+        <tr data-location="{{ row.location }}"
+            data-species="{{ row.species }}"
+            data-size="{{ row.size }}"
+            data-qty="{{ row.qty }}"
+            data-week="{{ row.week_shifted }}">
+          <td class="location">{{ row.location }}</td>
+          <td class="species">{{ row.species }}</td>
+          <td>{{ row.size }}</td>
+          <td class="qty">{{ row.qty }}</td>
+          <td class="week">{{ row.week_shifted }}</td>
+          <td><button class="restore-btn" onclick="addFromExtra(this)">+ Add</button></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</details>
+{% endif %}
+
+<script>
+  function updateCounts() {
+    const mainRows = document.querySelectorAll('#main-tbody tr');
+    const removedRows = document.querySelectorAll('#removed-tbody tr');
+
+    document.getElementById('main-badge').textContent = mainRows.length;
+    document.getElementById('row-count').textContent = mainRows.length + ' row' + (mainRows.length !== 1 ? 's' : '');
+
+    const removedCard = document.getElementById('removed-card');
+    const removedBadge = document.getElementById('removed-badge');
+    const restoreAllBtn = document.getElementById('restore-all-btn');
+    const mainEmpty = document.getElementById('main-empty');
+
+    removedBadge.textContent = removedRows.length;
+    removedCard.style.display = removedRows.length ? 'block' : 'none';
+    restoreAllBtn.style.display = removedRows.length ? 'inline-flex' : 'none';
+    mainEmpty.style.display = mainRows.length ? 'none' : 'block';
+  }
+
+  function removeRow(btn) {
+    const tr = btn.closest('tr');
+    const clone = tr.cloneNode(true);
+
+    // Swap button
+    const cell = clone.querySelector('td:last-child');
+    cell.innerHTML = '<button class="restore-btn" onclick="restoreRow(this)">↩ Restore</button>';
+
+    document.getElementById('removed-tbody').appendChild(clone);
+    tr.remove();
+    updateCounts();
+  }
+
+  function restoreRow(btn) {
+    const tr = btn.closest('tr');
+    const clone = tr.cloneNode(true);
+
+    // Swap button back
+    const cell = clone.querySelector('td:last-child');
+    cell.innerHTML = '<button class="remove-btn" title="Remove row" onclick="removeRow(this)">✕</button>';
+
+    document.getElementById('main-tbody').appendChild(clone);
+    tr.remove();
+    updateCounts();
+  }
+
+  function restoreAll() {
+    const rows = document.querySelectorAll('#removed-tbody tr');
+    rows.forEach(tr => {
+      const clone = tr.cloneNode(true);
+      const cell = clone.querySelector('td:last-child');
+      cell.innerHTML = '<button class="remove-btn" title="Remove row" onclick="removeRow(this)">✕</button>';
+      document.getElementById('main-tbody').appendChild(clone);
+      tr.remove();
+    });
+    updateCounts();
+  }
+
+  function addFromExtra(btn) {
+    const tr = btn.closest('tr');
+    const clone = tr.cloneNode(true);
+
+    const cell = clone.querySelector('td:last-child');
+    cell.innerHTML = '<button class="remove-btn" title="Remove row" onclick="removeRow(this)">✕</button>';
+
+    document.getElementById('main-tbody').appendChild(clone);
+    tr.style.opacity = '0.35';
+    btn.textContent = '✓ Added';
+    btn.disabled = true;
+    updateCounts();
+  }
+
+  function exportCSV() {
+    const rows = document.querySelectorAll('#main-tbody tr');
+    const lines = ['Location,Species,Size,Qty,Week Shifted'];
+    rows.forEach(tr => {
+      const d = tr.dataset;
+      const escape = v => '"' + (v || '').replace(/"/g, '""') + '"';
+      lines.push([d.location, d.species, d.size, d.qty, d.week].map(escape).join(','));
+    });
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'pre_emergent_list.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  updateCounts();
+</script>
+</body>
+</html>
