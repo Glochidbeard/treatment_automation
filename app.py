@@ -111,12 +111,30 @@ def process_inventory(df):
         k = _iso_week_key(dt)
         return k >= cutoff_key
 
-    passed["in_window"] = passed["date_parsed"].apply(in_window)
-    in_range = passed[passed["in_window"]].copy()
-    out_of_range = passed[~passed["in_window"]].copy()
+    # Key by crop code, not individual row date:
+    # TimeSaver only stamps a date on the first bed of a lot — the rest of the
+    # beds for that lot have NaN dates.  So we find which crop codes have ANY
+    # bed with an in-window date, then pull in ALL beds for those crop codes.
+    passed["row_in_window"] = passed["date_parsed"].apply(in_window)
+    in_window_codes = set(
+        passed.loc[passed["row_in_window"], "crop_code"].dropna().unique()
+    )
+    in_range = passed[passed["crop_code"].isin(in_window_codes)].copy()
+    out_of_range = passed[~passed["crop_code"].isin(in_window_codes)].copy()
 
-    # Sort most-recent first
-    in_range = in_range.sort_values("date_parsed", ascending=False)
+    # Give every row a representative date (the most-recent date for its crop code)
+    # so we can sort lots from newest to oldest even when individual rows lack dates.
+    code_date = (
+        passed.groupby("crop_code")["date_parsed"]
+        .max()
+        .rename("rep_date")
+    )
+    in_range = in_range.join(code_date, on="crop_code")
+
+    # Sort: newest lot first, then by location within the lot
+    in_range = in_range.sort_values(
+        ["rep_date", "crop_code", "location"], ascending=[False, True, True]
+    )
 
     # Week shifted column
     for frame in (in_range, out_of_range, excluded):
