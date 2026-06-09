@@ -280,7 +280,8 @@
     </thead>
     <tbody id="main-tbody">
       {% for row in main_rows %}
-      <tr data-location="{{ row.location }}"
+      <tr data-row-id="{{ row.row_id }}"
+          data-location="{{ row.location }}"
           data-species="{{ row.species }}"
           data-size="{{ row.size }}"
           data-qty="{{ row.qty }}"
@@ -340,7 +341,8 @@
       </thead>
       <tbody id="extra-tbody">
         {% for row in extra_rows %}
-        <tr data-location="{{ row.location }}"
+        <tr data-row-id="{{ row.row_id }}"
+            data-location="{{ row.location }}"
             data-species="{{ row.species }}"
             data-size="{{ row.size }}"
             data-qty="{{ row.qty }}"

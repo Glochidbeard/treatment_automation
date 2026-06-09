@@ -132,6 +132,7 @@ def build_rows(df):
     rows = []
     for _, r in df.iterrows():
         rows.append({
+            "row_id": int(r.get("row_id", 0)),
             "location": str(r.get("location", "")),
             "species": str(r.get("species", "")),
             "size": str(r.get("size", "")),
@@ -187,6 +188,7 @@ def process():
     try:
         content = f.read().decode("utf-8-sig")
         df = pd.read_csv(io.StringIO(content))
+        df["row_id"] = range(len(df))   # stable identity — survives all filtering/sorting
     except Exception as e:
         return render_template("index.html", error=f"Could not parse file: {e}")
 
@@ -214,5 +216,5 @@ def process():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5001))
     app.run(host="0.0.0.0", port=port, debug=False)
