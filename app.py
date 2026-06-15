@@ -2,10 +2,10 @@ import io
 import os
 import re
 import sys
-from datetime import date
+from datetime import date, timedelta
 
 import pandas as pd
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, render_template, request
 
 sys.path.insert(0, os.path.dirname(__file__))
 from opt_plugin import optimize
@@ -17,7 +17,6 @@ app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB
 # ── helpers ──────────────────────────────────────────────────────────────────
 
 def _normalize_loc(s):
-    """Match opt_plugin's _normalize so we can align df rows with optimized output."""
     s = re.sub(r"\s*>\s*", ">", s.strip())
     parts = s.split(">")
     out = []
@@ -31,7 +30,6 @@ def _normalize_loc(s):
 
 
 def _size_gallons(size_str):
-    """Return numeric value if size is >= 1G, else None."""
     if not isinstance(size_str, str):
         return None
     s = size_str.strip().upper()
@@ -45,7 +43,6 @@ def _size_gallons(size_str):
 
 
 def _week_shifted(crop_code):
-    """Last 4 digits of the crop code string (e.g. '596-22-0426' → '0426')."""
     if not isinstance(crop_code, str):
         return ""
     digits = "".join(c for c in crop_code if c.isdigit())
@@ -53,28 +50,42 @@ def _week_shifted(crop_code):
 
 
 def _iso_week_key(dt):
-    """(year, week) as a comparable tuple from a datetime."""
     if pd.isna(dt):
         return (0, 0)
     iso = dt.isocalendar()
     return (iso[0], iso[1])
 
 
-def _current_week_key():
-    iso = date.today().isocalendar()
-    return (iso[0], iso[1])
+def _week_options(n_back=52):
+    """Return list of (value, label) for the last n_back weeks ending today."""
+    today = date.today()
+    options = []
+    for i in range(n_back, -1, -1):
+        d = today - timedelta(weeks=i)
+        iso = d.isocalendar()
+        y, w = iso[0], iso[1]
+        value = f"{y}-{w}"          # e.g. "2026-24"  (passed in form)
+        label = f"W{w:02d}-{str(y)[-2:]}"  # e.g. "W24-26"  (shown to user)
+        options.append((value, label))
+    # deduplicate while preserving order (same ISO week can cover multiple calendar days)
+    seen = set()
+    unique = []
+    for v, l in options:
+        if v not in seen:
+            seen.add(v)
+            unique.append((v, l))
+    return unique
 
 
-def _week_key_minus(key, n):
-    """Subtract n weeks from an (year, week) key."""
-    y, w = key
-    total = y * 52 + w - n
-    return (total // 52, total % 52 or 52)
+def _parse_week_value(value):
+    """Parse '2026-24' → (2026, 24)."""
+    y, w = value.split("-")
+    return (int(y), int(w))
 
 
 # ── processing ────────────────────────────────────────────────────────────────
 
-def process_inventory(df):
+def process_inventory(df, from_key, to_key):
     col_map = {
         "Locations": "location",
         "Product": "product",
@@ -103,40 +114,32 @@ def process_inventory(df):
     # Parse dates
     passed["date_parsed"] = pd.to_datetime(passed["date_changed"], errors="coerce")
 
-    # 3-week window: current week and 2 prior (e.g. weeks 22-24)
-    cur_key = _current_week_key()
-    cutoff_key = _week_key_minus(cur_key, 2)
-
     def in_window(dt):
         k = _iso_week_key(dt)
-        return k >= cutoff_key
+        return from_key <= k <= to_key
 
-    # Key by crop code, not individual row date:
-    # TimeSaver only stamps a date on the first bed of a lot — the rest of the
-    # beds for that lot have NaN dates.  So we find which crop codes have ANY
-    # bed with an in-window date, then pull in ALL beds for those crop codes.
+    # Key by crop code:
+    # TimeSaver only stamps a date on the first bed of a lot; the rest are NaN.
+    # Include beds that are explicitly in-window, plus undated siblings of
+    # in-window crop codes.  Beds with an explicit out-of-window date stay out
+    # even if their crop code matches (they belong to a different potting event).
     passed["row_in_window"] = passed["date_parsed"].apply(in_window)
     in_window_codes = set(
         passed.loc[passed["row_in_window"], "crop_code"].dropna().unique()
     )
-    in_range = passed[passed["crop_code"].isin(in_window_codes)].copy()
-    out_of_range = passed[~passed["crop_code"].isin(in_window_codes)].copy()
+    in_range = passed[
+        passed["row_in_window"] |
+        (passed["crop_code"].isin(in_window_codes) & passed["date_parsed"].isna())
+    ].copy()
+    out_of_range = passed[~passed.index.isin(in_range.index)].copy()
 
-    # Give every row a representative date (the most-recent date for its crop code)
-    # so we can sort lots from newest to oldest even when individual rows lack dates.
-    code_date = (
-        passed.groupby("crop_code")["date_parsed"]
-        .max()
-        .rename("rep_date")
-    )
+    # Representative date per crop code for sorting
+    code_date = passed.groupby("crop_code")["date_parsed"].max().rename("rep_date")
     in_range = in_range.join(code_date, on="crop_code")
-
-    # Sort: newest lot first, then by location within the lot
     in_range = in_range.sort_values(
         ["rep_date", "crop_code", "location"], ascending=[False, True, True]
     )
 
-    # Week shifted column
     for frame in (in_range, out_of_range, excluded):
         if "crop_code" in frame.columns:
             frame["week_shifted"] = frame["crop_code"].apply(_week_shifted)
@@ -161,14 +164,12 @@ def build_rows(df):
 
 
 def route_order(df):
-    """Return df rows ordered by optimized route, plus optimizer metadata."""
     if df.empty:
         return df, None, []
 
     df = df.copy()
     df["loc_norm"] = df["location"].apply(_normalize_loc)
 
-    # Unique locations in original order for the optimizer
     seen = []
     for loc in df["loc_norm"]:
         if loc not in seen:
@@ -180,10 +181,7 @@ def route_order(df):
     except Exception as e:
         return df, None, [str(e)]
 
-    # Build order map: normalized loc → position
     order_map = {loc: i for i, loc in enumerate(ordered)}
-
-    # Assign sort key; unresolved locs go to end
     df["_order"] = df["loc_norm"].map(lambda l: order_map.get(l, len(ordered)))
     df = df.sort_values("_order").drop(columns=["_order", "loc_norm"])
 
@@ -194,32 +192,62 @@ def route_order(df):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    options = _week_options(52)
+    today_iso = date.today().isocalendar()
+    default_to = f"{today_iso[0]}-{today_iso[1]}"
+    # default from = 2 weeks back
+    d_from = date.today() - timedelta(weeks=2)
+    iso_from = d_from.isocalendar()
+    default_from = f"{iso_from[0]}-{iso_from[1]}"
+    return render_template("index.html", week_options=options,
+                           default_from=default_from, default_to=default_to)
 
 
 @app.route("/process", methods=["POST"])
 def process():
+    week_options = _week_options(52)
+    today_iso = date.today().isocalendar()
+    default_to = f"{today_iso[0]}-{today_iso[1]}"
+    d_from = date.today() - timedelta(weeks=2)
+    iso_from = d_from.isocalendar()
+    default_from = f"{iso_from[0]}-{iso_from[1]}"
+
     if "file" not in request.files or request.files["file"].filename == "":
-        return render_template("index.html", error="Please select a CSV file.")
+        return render_template("index.html", error="Please select a CSV file.",
+                               week_options=week_options,
+                               default_from=default_from, default_to=default_to)
+
+    from_val = request.form.get("from_week", default_from)
+    to_val   = request.form.get("to_week",   default_to)
+
+    try:
+        from_key = _parse_week_value(from_val)
+        to_key   = _parse_week_value(to_val)
+    except Exception:
+        from_key = _parse_week_value(default_from)
+        to_key   = _parse_week_value(default_to)
+
+    if from_key > to_key:
+        from_key, to_key = to_key, from_key
 
     f = request.files["file"]
     try:
         content = f.read().decode("utf-8-sig")
         df = pd.read_csv(io.StringIO(content))
-        df["row_id"] = range(len(df))   # stable identity — survives all filtering/sorting
+        df["row_id"] = range(len(df))
     except Exception as e:
-        return render_template("index.html", error=f"Could not parse file: {e}")
+        return render_template("index.html", error=f"Could not parse file: {e}",
+                               week_options=week_options,
+                               default_from=default_from, default_to=default_to)
 
-    in_range, out_of_range, excluded = process_inventory(df)
-
-    # Route-optimize the in-window rows
+    in_range, out_of_range, excluded = process_inventory(df, from_key, to_key)
     in_range_ordered, total_time, opt_errors = route_order(in_range)
 
-    main_rows = build_rows(in_range_ordered)
+    main_rows  = build_rows(in_range_ordered)
     extra_rows = build_rows(out_of_range) + build_rows(excluded)
 
-    cur_y, cur_w = _current_week_key()
-    cut_y, cut_w = _week_key_minus((cur_y, cur_w), 2)
+    from_label = f"W{from_key[1]:02d}-{str(from_key[0])[-2:]}"
+    to_label   = f"W{to_key[1]:02d}-{str(to_key[0])[-2:]}"
 
     return render_template(
         "result.html",
@@ -227,8 +255,8 @@ def process():
         extra_rows=extra_rows,
         total_time=round(total_time, 1) if total_time else None,
         opt_errors=opt_errors,
-        current_week=f"W{cur_w:02d}-{str(cur_y)[-2:]}",
-        cutoff_week=f"W{cut_w:02d}-{str(cut_y)[-2:]}",
+        current_week=to_label,
+        cutoff_week=from_label,
         filename=f.filename,
     )
 

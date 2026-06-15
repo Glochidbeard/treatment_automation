@@ -118,6 +118,50 @@
     font-size: 0.88rem;
   }
 
+  .week-range {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  .week-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .week-field label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #6b7a6b;
+  }
+
+  .week-field select {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #c5d5c5;
+    border-radius: 7px;
+    font-size: 0.9rem;
+    font-family: monospace;
+    color: #1a2e1a;
+    background: #fff;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7a6b' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2rem;
+  }
+
+  .week-field select:focus {
+    outline: none;
+    border-color: #4a8a4a;
+    box-shadow: 0 0 0 3px rgba(74,138,74,.15);
+  }
+
   .spinner {
     display: none;
     width: 18px; height: 18px;
@@ -148,6 +192,26 @@
       <div class="drop-hint">TimeSaver inventory export (.csv)</div>
     </div>
     <div id="file-name"></div>
+
+    <div class="week-range">
+      <div class="week-field">
+        <label for="from_week">From week</label>
+        <select name="from_week" id="from_week">
+          {% for value, label in week_options %}
+          <option value="{{ value }}" {% if value == default_from %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="week-field">
+        <label for="to_week">To week</label>
+        <select name="to_week" id="to_week">
+          {% for value, label in week_options %}
+          <option value="{{ value }}" {% if value == default_to %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
     <button type="submit" class="btn" id="submit-btn" disabled>
       <span id="btn-text">Generate List</span>
       <div class="spinner" id="spinner"></div>
