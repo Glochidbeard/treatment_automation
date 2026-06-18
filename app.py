@@ -56,6 +56,28 @@ def _iso_week_key(dt):
     return (iso[0], iso[1])
 
 
+def _is_inside(location):
+    """True if the location is in a covered/indoor growing area.
+    Inside: F rows 1-10, A rows 3-5.
+    """
+    if not isinstance(location, str):
+        return False
+    norm = re.sub(r"\s*>\s*", ">", location.strip())
+    parts = norm.split(">")
+    if len(parts) < 2:
+        return False
+    section = parts[0].upper()
+    try:
+        row = int(parts[1])
+    except ValueError:
+        return False
+    if section == "F" and 1 <= row <= 10:
+        return True
+    if section == "A" and 3 <= row <= 5:
+        return True
+    return False
+
+
 def _week_options(n_back=52):
     """Return list of (value, label) for the last n_back weeks ending today."""
     today = date.today()
@@ -145,6 +167,7 @@ def process_inventory(df, from_key, to_key):
             frame["week_shifted"] = frame["crop_code"].apply(_week_shifted)
         else:
             frame["week_shifted"] = ""
+        frame["inside"] = frame["location"].apply(_is_inside)
 
     return in_range, out_of_range, excluded
 
@@ -159,6 +182,7 @@ def build_rows(df):
             "size": str(r.get("size", "")),
             "qty": str(r.get("qty", "")),
             "week_shifted": str(r.get("week_shifted", "")),
+            "inside": bool(r.get("inside", False)),
         })
     return rows
 
@@ -241,19 +265,33 @@ def process():
                                default_from=default_from, default_to=default_to)
 
     in_range, out_of_range, excluded = process_inventory(df, from_key, to_key)
-    in_range_ordered, total_time, opt_errors = route_order(in_range)
 
-    main_rows  = build_rows(in_range_ordered)
-    extra_rows = build_rows(out_of_range) + build_rows(excluded)
+    # Route inside and outside groups independently
+    inside_df  = in_range[in_range["inside"]].copy()
+    outside_df = in_range[~in_range["inside"]].copy()
+
+    inside_ordered,  inside_time,  inside_errors  = route_order(inside_df)
+    outside_ordered, outside_time, outside_errors = route_order(outside_df)
+
+    opt_errors = inside_errors + outside_errors
+
+    inside_rows  = build_rows(inside_ordered)
+    outside_rows = build_rows(outside_ordered)
+    extra_rows   = build_rows(out_of_range) + build_rows(excluded)
 
     from_label = f"W{from_key[1]:02d}-{str(from_key[0])[-2:]}"
     to_label   = f"W{to_key[1]:02d}-{str(to_key[0])[-2:]}"
 
+    total_time = None
+    if inside_time is not None or outside_time is not None:
+        total_time = round((inside_time or 0) + (outside_time or 0), 1)
+
     return render_template(
         "result.html",
-        main_rows=main_rows,
+        inside_rows=inside_rows,
+        outside_rows=outside_rows,
         extra_rows=extra_rows,
-        total_time=round(total_time, 1) if total_time else None,
+        total_time=total_time,
         opt_errors=opt_errors,
         current_week=to_label,
         cutoff_week=from_label,
