@@ -118,10 +118,38 @@
     font-size: 0.88rem;
   }
 
+  .week-mode-toggle {
+    display: flex;
+    gap: 0;
+    margin-top: 1.25rem;
+    border: 1px solid #c5d5c5;
+    border-radius: 7px;
+    overflow: hidden;
+  }
+
+  .week-mode-toggle input[type="radio"] { display: none; }
+
+  .week-mode-toggle label {
+    flex: 1;
+    text-align: center;
+    padding: 0.45rem 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7a6b;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    user-select: none;
+  }
+
+  .week-mode-toggle input[type="radio"]:checked + label {
+    background: #2d6a2d;
+    color: #fff;
+  }
+
   .week-range {
     display: flex;
     gap: 0.75rem;
-    margin-top: 1.25rem;
+    margin-top: 0.75rem;
   }
 
   .week-field {
@@ -193,16 +221,23 @@
     </div>
     <div id="file-name"></div>
 
+    <div class="week-mode-toggle">
+      <input type="radio" name="week_mode" id="mode-range" value="range" checked>
+      <label for="mode-range">Week range</label>
+      <input type="radio" name="week_mode" id="mode-single" value="single">
+      <label for="mode-single">Single week</label>
+    </div>
+
     <div class="week-range">
       <div class="week-field">
-        <label for="from_week">From week</label>
+        <label for="from_week" id="from-label">From week</label>
         <select name="from_week" id="from_week">
           {% for value, label in week_options %}
           <option value="{{ value }}" {% if value == default_from %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
       </div>
-      <div class="week-field">
+      <div class="week-field" id="to-field">
         <label for="to_week">To week</label>
         <select name="to_week" id="to_week">
           {% for value, label in week_options %}
@@ -246,7 +281,32 @@
     }
   });
 
+  // Single / range mode toggle
+  const modeRadios = document.querySelectorAll('input[name="week_mode"]');
+  const toField    = document.getElementById('to-field');
+  const fromLabel  = document.getElementById('from-label');
+  const fromSel    = document.getElementById('from_week');
+  const toSel      = document.getElementById('to_week');
+
+  function applyMode() {
+    const single = document.getElementById('mode-single').checked;
+    toField.style.display = single ? 'none' : '';
+    fromLabel.textContent  = single ? 'Week' : 'From week';
+    if (single) toSel.value = fromSel.value;
+  }
+
+  modeRadios.forEach(r => r.addEventListener('change', applyMode));
+
+  // Keep to_week in sync when in single mode
+  fromSel.addEventListener('change', () => {
+    if (document.getElementById('mode-single').checked) toSel.value = fromSel.value;
+  });
+
+  applyMode();
+
   document.getElementById('upload-form').addEventListener('submit', () => {
+    // Final sync before submit
+    if (document.getElementById('mode-single').checked) toSel.value = fromSel.value;
     btnText.style.display = 'none';
     spinner.style.display = 'block';
     btn.disabled = true;

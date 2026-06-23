@@ -145,14 +145,13 @@ def process_inventory(df, from_key, to_key):
     # Include beds that are explicitly in-window, plus undated siblings of
     # in-window crop codes.  Beds with an explicit out-of-window date stay out
     # even if their crop code matches (they belong to a different potting event).
-    passed["row_in_window"] = passed["date_parsed"].apply(in_window)
+    passed["row_in_window"] = passed["date_parsed"].apply(in_window).astype(bool)
     in_window_codes = set(
         passed.loc[passed["row_in_window"], "crop_code"].dropna().unique()
     )
-    in_range = passed[
-        passed["row_in_window"] |
-        (passed["crop_code"].isin(in_window_codes) & passed["date_parsed"].isna())
-    ].copy()
+    mask_in_window        = passed["row_in_window"]
+    mask_undated_sibling  = passed["crop_code"].isin(in_window_codes) & passed["date_parsed"].isna()
+    in_range = passed[mask_in_window | mask_undated_sibling].copy()
     out_of_range = passed[~passed.index.isin(in_range.index)].copy()
 
     # Representative date per crop code for sorting
