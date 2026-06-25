@@ -184,7 +184,8 @@
   <span class="spacer"></span>
   <span class="row-count" id="row-count"></span>
   <button class="btn btn-secondary" id="restore-all-btn" onclick="restoreAll()" style="display:none">↩ Restore all</button>
-  <button class="btn btn-primary" onclick="exportCSV()">⬇ Export CSV</button>
+  <button class="btn btn-secondary" onclick="exportRootshieldCSV()">⬇ Rootshield + Fertilizer</button>
+  <button class="btn btn-primary" onclick="exportCSV()">⬇ Pre-Emergent CSV</button>
 </div>
 
 <!-- ── INSIDE block ──────────────────────────────────────────────────────── -->
@@ -413,6 +414,40 @@
     btn.textContent = '✓ Added';
     btn.disabled = true;
     updateCounts();
+  }
+
+  const ROOTSHIELD_GENERA = new Set([
+    'salvia','rhus','diplacus','ceanothus','arctostaphylos','sambucus',
+    'eriogonum','frangula','carpenteria','garrya','lepechinia','adenostoma',
+    'simmondsia','comarostaphylos','dendromecon','calycanthus','iris',
+    'trichostema','umbellularia'
+  ]);
+
+  function _matchesGenus(species) {
+    const genus = (species || '').trim().split(/\s+/)[0].toLowerCase();
+    return ROOTSHIELD_GENERA.has(genus);
+  }
+
+  function exportRootshieldCSV() {
+    const lines = ['Location,Species,Size,Qty,Week Shifted,Inside/Outside'];
+    ['inside-tbody', 'outside-tbody'].forEach(id => {
+      const label = id === 'inside-tbody' ? 'Inside' : 'Outside';
+      document.querySelectorAll(`#${id} tr`).forEach(tr => {
+        if (!_matchesGenus(tr.dataset.species)) return;
+        const d = tr.dataset;
+        const e = v => '"' + (v || '').replace(/"/g, '""') + '"';
+        lines.push([d.location, d.species, d.size, d.qty, d.week, label].map(e).join(','));
+      });
+    });
+    if (lines.length === 1) {
+      alert('No Rootshield/Fertilizer genera found in the current list.');
+      return;
+    }
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'rootshield_fertilizer_list.csv'; a.click();
+    URL.revokeObjectURL(url);
   }
 
   function exportCSV() {
