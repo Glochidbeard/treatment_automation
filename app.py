@@ -226,8 +226,8 @@ def process_inventory(df, from_key, to_key):
         df["species"] = df["species"].where(~mask, product_col)
 
     df["size_val"] = df["size"].apply(_size_gallons)
-    df["is_large"] = df["size_val"].notna()
-    df["is_liner"] = df["size"].apply(_is_liner)
+    df["is_large"] = df["size_val"].notna().astype(bool)
+    df["is_liner"] = df["size"].apply(_is_liner).astype(bool)
 
     active   = df[df["is_large"] | df["is_liner"]].copy()
     excluded = df[~(df["is_large"] | df["is_liner"])].copy()
