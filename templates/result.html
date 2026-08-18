@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pre-Emergent List — Results</title>
+<title>Treatment Lists — Results</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -16,108 +16,126 @@
   }
 
   .page-header {
-    max-width: 1100px;
-    margin: 0 auto 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
+    max-width: 1200px; margin: 0 auto 1.5rem;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
   }
-
   .page-header h1 { font-size: 1.4rem; font-weight: 700; flex: 1; }
-
   .meta {
     font-size: 0.82rem; color: #6b7a6b;
     background: #e8f0e8; padding: 0.35rem 0.75rem; border-radius: 20px;
   }
 
   .toolbar {
-    max-width: 1100px; margin: 0 auto 1rem;
+    max-width: 1200px; margin: 0 auto 1rem;
     display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;
   }
-
-  .btn {
-    padding: 0.55rem 1.1rem; border: none; border-radius: 7px;
-    font-size: 0.88rem; font-weight: 600; cursor: pointer;
-    transition: background .15s; text-decoration: none;
-    display: inline-flex; align-items: center; gap: 0.4rem;
-  }
-
-  .btn-primary  { background: #2d6a2d; color: #fff; }
-  .btn-primary:hover  { background: #1e4e1e; }
-  .btn-secondary { background: #e8f0e8; color: #2d6a2d; }
-  .btn-secondary:hover { background: #d0e4d0; }
-  .btn-ghost { background: transparent; color: #6b7a6b; border: 1px solid #c5d5c5; }
-  .btn-ghost:hover { background: #f0f4f0; }
-
   .spacer { flex: 1; }
   .row-count { font-size: 0.85rem; color: #6b7a6b; align-self: center; }
 
-  /* ── Section blocks ─────────────────────────────────────────────────── */
-  .section-label {
-    max-width: 1100px; margin: 0 auto 0.5rem;
-    display: flex; align-items: center; gap: 0.75rem;
+  .btn {
+    padding: 0.5rem 1rem; border: none; border-radius: 7px;
+    font-size: 0.83rem; font-weight: 600; cursor: pointer;
+    transition: background .15s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.35rem;
   }
+  .btn-ghost    { background: transparent; color: #6b7a6b; border: 1px solid #c5d5c5; }
+  .btn-ghost:hover { background: #f0f4f0; }
+  .btn-restore  { background: #e8f0e8; color: #2d6a2d; }
+  .btn-restore:hover { background: #d0e4d0; }
 
-  .section-label h2 {
-    font-size: 1rem; font-weight: 700; letter-spacing: .02em;
+  /* ── Bin section layout ─────────────────────────────────────────────── */
+  .bin-section { max-width: 1200px; margin: 0 auto 2rem; }
+
+  .bin-header {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;
+    flex-wrap: wrap;
   }
-
-  .section-divider {
-    flex: 1; height: 2px; border-radius: 2px;
-  }
-
-  .inside-accent  { background: #5a9a7a; }
-  .outside-accent { background: #7a9a5a; }
-
-  .tag {
-    font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.65rem;
+  .bin-header h2 { font-size: 1rem; font-weight: 700; white-space: nowrap; }
+  .bin-divider { flex: 1; height: 2px; border-radius: 2px; min-width: 20px; }
+  .bin-tag {
+    font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.65rem;
     border-radius: 12px; text-transform: uppercase; letter-spacing: .06em;
+    white-space: nowrap;
+  }
+  .bin-export-btn {
+    padding: 0.35rem 0.85rem; border: none; border-radius: 6px;
+    font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    transition: background .15s; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 0.3rem;
   }
 
-  .tag-inside  { background: #d0ede0; color: #2a6a4a; }
-  .tag-outside { background: #ddedc0; color: #4a6a2a; }
+  /* ── Per-bin color tokens ──────────────────────────────────────────── */
+  .bin-pre     { --accent:#2d6a2d; --accent-bg:#e8f5e8; --tag-bg:#d0e8d0; --tag-fg:#1a4a1a; --export-bg:#2d6a2d; --export-fg:#fff; --export-hover:#1e4e1e; }
+  .bin-rs-in   { --accent:#1a7a7a; --accent-bg:#e0f5f5; --tag-bg:#b8e8e8; --tag-fg:#0a4a4a; --export-bg:#1a7a7a; --export-fg:#fff; --export-hover:#0a5a5a; }
+  .bin-rs-out  { --accent:#2a5a8a; --accent-bg:#e0ecf8; --tag-bg:#c0d8f0; --tag-fg:#0a3a6a; --export-bg:#2a5a8a; --export-fg:#fff; --export-hover:#1a4a7a; }
+  .bin-rps-in  { --accent:#6a3a8a; --accent-bg:#f0e8f8; --tag-bg:#dfc8f0; --tag-fg:#4a1a6a; --export-bg:#6a3a8a; --export-fg:#fff; --export-hover:#5a2a7a; }
+  .bin-rps-out { --accent:#3a3a8a; --accent-bg:#eceef8; --tag-bg:#cccef0; --tag-fg:#1a1a6a; --export-bg:#3a3a8a; --export-fg:#fff; --export-hover:#2a2a7a; }
+  .bin-banned  { --accent:#8a2a2a; --accent-bg:#fce8e8; --tag-bg:#f0c8c8; --tag-fg:#5a0a0a; }
 
-  /* ── Card / table ───────────────────────────────────────────────────── */
+  .bin-divider   { background: var(--accent); }
+  .bin-tag       { background: var(--tag-bg); color: var(--tag-fg); }
+  .bin-export-btn { background: var(--export-bg); color: var(--export-fg); }
+  .bin-export-btn:hover { background: var(--export-hover); }
+
+  /* ── Card ───────────────────────────────────────────────────────────── */
   .card {
     background: #fff; border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0,0,0,.07);
-    max-width: 1100px; margin: 0 auto 0.75rem; overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07); overflow: hidden;
   }
-
   .card-header {
-    padding: 0.75rem 1.25rem; border-bottom: 1px solid #e8f0e8;
+    padding: 0.65rem 1.25rem; border-bottom: 1px solid #e8f0e8;
     display: flex; align-items: center; gap: 0.75rem;
   }
-
-  .card-header span { font-size: 0.88rem; font-weight: 600; flex: 1; color: #3a5a3a; }
-
+  .card-header span { font-size: 0.85rem; font-weight: 600; flex: 1; }
   .badge {
-    background: #e8f0e8; color: #2d6a2d;
-    font-size: 0.75rem; font-weight: 700;
-    padding: 0.2rem 0.6rem; border-radius: 12px;
+    font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.6rem;
+    border-radius: 12px; background: var(--accent-bg, #e8f0e8);
+    color: var(--accent, #2d6a2d);
   }
-
   .badge-warn { background: #fff7e0; color: #9a6a00; }
 
-  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  /* ── Banned card ─────────────────────────────────────────────────────── */
+  .banned-card {
+    max-width: 1200px; margin: 0 auto 2rem;
+    background: #fff8f8; border: 1px solid #f0c8c8; border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  }
+  .banned-card .card-header {
+    border-bottom-color: #f0c8c8;
+    background: #fce8e8;
+  }
+  .banned-note {
+    padding: 0.65rem 1.25rem; font-size: 0.8rem; color: #8a2a2a;
+    border-bottom: 1px solid #f0c8c8;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
 
+  /* ── Table ───────────────────────────────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; font-size: 0.865rem; }
   thead th {
-    background: #f7faf7; padding: 0.6rem 1rem; text-align: left;
-    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    background: #f7faf7; padding: 0.55rem 0.85rem; text-align: left;
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
     letter-spacing: .05em; color: #5a7a5a;
     border-bottom: 1px solid #e8f0e8; white-space: nowrap;
   }
-
   tbody tr { border-bottom: 1px solid #f0f4f0; transition: background .1s; }
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: #f7faf7; }
-
-  td { padding: 0.55rem 1rem; vertical-align: middle; }
-  td.location { font-family: monospace; font-size: 0.82rem; color: #3a5a3a; }
+  td { padding: 0.5rem 0.85rem; vertical-align: middle; }
+  td.location { font-family: monospace; font-size: 0.8rem; color: #3a5a3a; }
   td.species  { font-style: italic; }
   td.week     { font-family: monospace; font-weight: 600; color: #4a7a4a; }
   td.qty      { font-weight: 600; }
+  td.legal    { font-family: monospace; font-size: 0.78rem; color: #5a6a8a; }
+  td.count-cell { text-align: center; }
+
+  .count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 22px; height: 22px; border-radius: 11px; padding: 0 5px;
+    font-size: 0.72rem; font-weight: 700;
+  }
+  .count-1    { background: #eef0ee; color: #6a7a6a; }
+  .count-multi { background: #fff3cd; color: #856404; }
 
   .remove-btn {
     background: none; border: none; color: #c5a5a5; cursor: pointer;
@@ -133,11 +151,16 @@
   }
   .restore-btn:hover { background: #e8f5e8; }
 
-  .section-gap { max-width: 1100px; margin: 0 auto 1.5rem; }
+  .no-rows-msg {
+    display: none; text-align: center; padding: 1.75rem;
+    color: #8a9a8a; font-size: 0.88rem;
+  }
 
-  /* ── Removed / extras ───────────────────────────────────────────────── */
-  details { max-width: 1100px; margin: 0 auto 1.5rem; }
+  /* ── Removed staging ─────────────────────────────────────────────────── */
+  .removed-section { max-width: 1200px; margin: 0 auto 2rem; }
 
+  /* ── Extras ──────────────────────────────────────────────────────────── */
+  details { max-width: 1200px; margin: 0 auto 2rem; }
   summary {
     cursor: pointer; list-style: none;
     display: flex; align-items: center; gap: 0.5rem;
@@ -145,31 +168,27 @@
     padding: 0.5rem 0; user-select: none;
   }
   summary::-webkit-details-marker { display: none; }
-  summary::before { content: '▶'; font-size: 0.7rem; transition: transform .2s; display: inline-block; }
-  details[open] summary::before { transform: rotate(90deg); }
+  summary::before { content:'▶'; font-size:.7rem; transition:transform .2s; display:inline-block; }
+  details[open] summary::before { transform:rotate(90deg); }
 
+  /* ── Warnings ────────────────────────────────────────────────────────── */
   .warnings {
-    max-width: 1100px; margin: 0 auto 1rem;
+    max-width: 1200px; margin: 0 auto 1rem;
     padding: 0.75rem 1rem; background: #fff7e0;
     border: 1px solid #f0d070; border-radius: 8px;
     font-size: 0.82rem; color: #7a5a00;
   }
   .warnings ul { padding-left: 1.25rem; }
   .warnings li { margin-top: 0.25rem; }
-
-  .no-rows-msg {
-    display: none; text-align: center; padding: 2rem;
-    color: #8a9a8a; font-size: 0.9rem;
-  }
 </style>
 </head>
 <body>
 
 <div class="page-header">
-  <h1>🌿 Pre-Emergent Application List</h1>
+  <h1>Treatment Lists</h1>
   <span class="meta">{{ filename }}</span>
   <span class="meta">{{ cutoff_week }} – {{ current_week }}</span>
-  {% if total_time %}<span class="meta">🗺 ~{{ total_time }} min route</span>{% endif %}
+  {% if total_time %}<span class="meta">🗺 ~{{ total_time }} min</span>{% endif %}
 </div>
 
 {% if opt_errors %}
@@ -182,125 +201,157 @@
 <div class="toolbar">
   <a href="/" class="btn btn-ghost">← New upload</a>
   <span class="spacer"></span>
-  <span class="row-count" id="row-count"></span>
-  <button class="btn btn-secondary" id="restore-all-btn" onclick="restoreAll()" style="display:none">↩ Restore all</button>
-  <button class="btn btn-secondary" onclick="exportRootshieldCSV()">⬇ Rootshield</button>
-  <button class="btn btn-primary" onclick="exportCSV()">⬇ Pre-Emergent CSV</button>
+  <span class="row-count" id="total-count"></span>
+  <button class="btn btn-restore" id="restore-all-btn" onclick="restoreAll()" style="display:none">↩ Restore all</button>
 </div>
 
-<!-- ── INSIDE block ──────────────────────────────────────────────────────── -->
-<div class="section-label">
-  <h2>Inside</h2>
-  <div class="section-divider inside-accent"></div>
-  <span class="tag tag-inside">F1–F10 · A3–A5</span>
-</div>
-
-<div class="card">
+<!-- ════════════════════════════════════════════════════════════════════════
+     BANNED — Pre-emergent inside (no export)
+     ════════════════════════════════════════════════════════════════════════ -->
+{% if banned_rows %}
+<div class="banned-card bin-banned">
   <div class="card-header">
-    <span>Application list — inside</span>
-    <span class="badge" id="inside-badge">{{ inside_rows|length }}</span>
+    <span>⛔ Pre-Emergent Inside — Banned</span>
+    <span class="badge" style="background:#f0c8c8;color:#8a2a2a">{{ banned_rows|length }}</span>
+  </div>
+  <div class="banned-note">
+    Indoor pre-emergent applications are not permitted. These items are excluded from all exports.
   </div>
   <table>
     <thead>
-      <tr>
-        <th>Location</th><th>Species</th><th>Size</th><th>Qty</th><th>Week Shifted</th><th></th>
-      </tr>
+      <tr><th>Location</th><th>Species</th><th>Size</th><th>Qty</th><th>Week</th><th>Legal</th></tr>
     </thead>
-    <tbody id="inside-tbody">
-      {% for row in inside_rows %}
-      <tr data-row-id="{{ row.row_id }}"
-          data-location="{{ row.location }}"
-          data-species="{{ row.species }}"
-          data-size="{{ row.size }}"
-          data-qty="{{ row.qty }}"
-          data-week="{{ row.week_shifted }}"
-          data-inside="1">
+    <tbody>
+      {% for row in banned_rows %}
+      <tr>
         <td class="location">{{ row.location }}</td>
         <td class="species">{{ row.species }}</td>
         <td>{{ row.size }}</td>
         <td class="qty">{{ row.qty }}</td>
         <td class="week">{{ row.week_shifted }}</td>
-        <td><button class="remove-btn" title="Remove" onclick="removeRow(this, 'inside-tbody')">✕</button></td>
+        <td class="legal">{{ row.legal_code }}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-  <div class="no-rows-msg" id="inside-empty">No inside rows. Restore from removed rows below.</div>
 </div>
+{% endif %}
 
-<div class="section-gap"></div>
-
-<!-- ── OUTSIDE block ─────────────────────────────────────────────────────── -->
-<div class="section-label">
-  <h2>Outside</h2>
-  <div class="section-divider outside-accent"></div>
-  <span class="tag tag-outside">All other sections</span>
-</div>
-
-<div class="card">
-  <div class="card-header">
-    <span>Application list — outside</span>
-    <span class="badge" id="outside-badge">{{ outside_rows|length }}</span>
+<!-- ════════════════════════════════════════════════════════════════════════
+     MACRO: renders one active bin section
+     ════════════════════════════════════════════════════════════════════════ -->
+{% macro bin_section(title, subtitle, rows, tbody_id, badge_id, empty_id, bin_class, export_file) %}
+<div class="bin-section {{ bin_class }}">
+  <div class="bin-header">
+    <h2>{{ title }}</h2>
+    <div class="bin-divider"></div>
+    <span class="bin-tag">{{ subtitle }}</span>
+    <button class="bin-export-btn" onclick="exportBinCSV('{{ tbody_id }}', '{{ export_file }}')">⬇ Export</button>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Location</th><th>Species</th><th>Size</th><th>Qty</th><th>Week Shifted</th><th></th>
-      </tr>
-    </thead>
-    <tbody id="outside-tbody">
-      {% for row in outside_rows %}
-      <tr data-row-id="{{ row.row_id }}"
-          data-location="{{ row.location }}"
-          data-species="{{ row.species }}"
-          data-size="{{ row.size }}"
-          data-qty="{{ row.qty }}"
-          data-week="{{ row.week_shifted }}"
-          data-inside="0">
-        <td class="location">{{ row.location }}</td>
-        <td class="species">{{ row.species }}</td>
-        <td>{{ row.size }}</td>
-        <td class="qty">{{ row.qty }}</td>
-        <td class="week">{{ row.week_shifted }}</td>
-        <td><button class="remove-btn" title="Remove" onclick="removeRow(this, 'outside-tbody')">✕</button></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <div class="no-rows-msg" id="outside-empty">No outside rows. Restore from removed rows below.</div>
-</div>
-
-<div class="section-gap"></div>
-
-<!-- ── Removed rows staging ──────────────────────────────────────────────── -->
-<div class="card" id="removed-card" style="display:none">
-  <div class="card-header">
-    <span>Removed rows</span>
-    <span class="badge badge-warn" id="removed-badge">0</span>
+  <div class="card">
+    <div class="card-header">
+      <span>{{ title }}</span>
+      <span class="badge" id="{{ badge_id }}">{{ rows|length }}</span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Location</th><th>Species</th><th>Size</th><th>Qty</th><th>Week</th><th>Legal</th><th title="# of bins this item appears in">#</th><th></th></tr>
+      </thead>
+      <tbody id="{{ tbody_id }}">
+        {% for row in rows %}
+        <tr data-row-id="{{ row.row_id }}"
+            data-location="{{ row.location }}"
+            data-species="{{ row.species }}"
+            data-size="{{ row.size }}"
+            data-qty="{{ row.qty }}"
+            data-week="{{ row.week_shifted }}"
+            data-legal="{{ row.legal_code }}"
+            data-bin-count="{{ row.bin_count }}">
+          <td class="location">{{ row.location }}</td>
+          <td class="species">{{ row.species }}</td>
+          <td>{{ row.size }}</td>
+          <td class="qty">{{ row.qty }}</td>
+          <td class="week">{{ row.week_shifted }}</td>
+          <td class="legal">{{ row.legal_code }}</td>
+          <td class="count-cell">
+            <span class="count-badge {{ 'count-multi' if row.bin_count > 1 else 'count-1' }}">{{ row.bin_count }}</span>
+          </td>
+          <td><button class="remove-btn" title="Remove" onclick="removeRow(this, '{{ tbody_id }}')">✕</button></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="no-rows-msg" id="{{ empty_id }}">No items. Restore from removed rows below.</div>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Location</th><th>Species</th><th>Size</th><th>Qty</th><th>Week Shifted</th><th>In/Out</th><th></th>
-      </tr>
-    </thead>
-    <tbody id="removed-tbody"></tbody>
-  </table>
+</div>
+{% endmacro %}
+
+{{ bin_section(
+    "Pre-Emergent Outside",
+    "≥1G · Outside",
+    pre_rows, "pre-tbody", "pre-badge", "pre-empty",
+    "bin-pre", "pre_emergent.csv"
+) }}
+
+{{ bin_section(
+    "Rootshield — Inside",
+    "Liners · F1–5, F7–10, A3–5, B1–2",
+    rs_in_rows, "rs-in-tbody", "rs-in-badge", "rs-in-empty",
+    "bin-rs-in", "rootshield_inside.csv"
+) }}
+
+{{ bin_section(
+    "Rootshield — Outside",
+    "Liners · Other outdoor locations",
+    rs_out_rows, "rs-out-tbody", "rs-out-badge", "rs-out-empty",
+    "bin-rs-out", "rootshield_outside.csv"
+) }}
+
+{{ bin_section(
+    "Rootshield + Seaweed — Inside",
+    "Liners · F7–10, A3–5, B1–2",
+    rps_in_rows, "rps-in-tbody", "rps-in-badge", "rps-in-empty",
+    "bin-rps-in", "rps_inside.csv"
+) }}
+
+{{ bin_section(
+    "Rootshield + Seaweed — Outside",
+    "Liners · B3–6 + recently shifted",
+    rps_out_rows, "rps-out-tbody", "rps-out-badge", "rps-out-empty",
+    "bin-rps-out", "rps_outside.csv"
+) }}
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     REMOVED STAGING
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="removed-section">
+  <div class="card" id="removed-card" style="display:none">
+    <div class="card-header">
+      <span>Removed rows</span>
+      <span class="badge badge-warn" id="removed-badge">0</span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Location</th><th>Species</th><th>Size</th><th>Qty</th><th>Week</th><th>Legal</th><th>Bin</th><th></th></tr>
+      </thead>
+      <tbody id="removed-tbody"></tbody>
+    </table>
+  </div>
 </div>
 
-<!-- ── Extra rows (out of window / wrong size) ───────────────────────────── -->
+<!-- ════════════════════════════════════════════════════════════════════════
+     EXTRAS (outside date window)
+     ════════════════════════════════════════════════════════════════════════ -->
 {% if extra_rows %}
 <details>
   <summary>
-    Additional items (outside selected range or excluded by size)
-    <span class="badge">{{ extra_rows|length }}</span>
+    Additional items (outside selected range or unrecognised size)
+    <span class="badge" style="background:#e8f0e8;color:#2d6a2d;margin-left:.25rem">{{ extra_rows|length }}</span>
   </summary>
   <div class="card" style="margin-top:.75rem">
     <table>
       <thead>
-        <tr>
-          <th>Location</th><th>Species</th><th>Size</th><th>Qty</th><th>Week Shifted</th><th>In/Out</th><th></th>
-        </tr>
+        <tr><th>Location</th><th>Species</th><th>Size</th><th>Qty</th><th>Week</th><th>Legal</th><th></th></tr>
       </thead>
       <tbody>
         {% for row in extra_rows %}
@@ -310,14 +361,19 @@
             data-size="{{ row.size }}"
             data-qty="{{ row.qty }}"
             data-week="{{ row.week_shifted }}"
-            data-inside="{{ '1' if row.inside else '0' }}">
+            data-legal="{{ row.legal_code }}"
+            data-primary-bin="{{ row.primary_bin if row.primary_bin is defined else '' }}">
           <td class="location">{{ row.location }}</td>
           <td class="species">{{ row.species }}</td>
           <td>{{ row.size }}</td>
           <td class="qty">{{ row.qty }}</td>
           <td class="week">{{ row.week_shifted }}</td>
-          <td><span class="tag {{ 'tag-inside' if row.inside else 'tag-outside' }}">{{ 'Inside' if row.inside else 'Outside' }}</span></td>
-          <td><button class="restore-btn" onclick="addFromExtra(this)">+ Add</button></td>
+          <td class="legal">{{ row.legal_code }}</td>
+          <td>
+            {% if row.primary_bin is defined and row.primary_bin %}
+            <button class="restore-btn" onclick="addFromExtra(this)">+ Add</button>
+            {% endif %}
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -327,38 +383,67 @@
 {% endif %}
 
 <script>
+  const BIN_TBODY = {
+    pre_out:  'pre-tbody',
+    rs_in:    'rs-in-tbody',
+    rs_out:   'rs-out-tbody',
+    rps_in:   'rps-in-tbody',
+    rps_out:  'rps-out-tbody',
+  };
+
+  const BIN_LABEL = {
+    pre_out:  'Pre-Emergent Outside',
+    rs_in:    'Rootshield Inside',
+    rs_out:   'Rootshield Outside',
+    rps_in:   'R+S Inside',
+    rps_out:  'R+S Outside',
+  };
+
+  const ACTIVE_TBODIES = Object.values(BIN_TBODY);
+
+  const BADGE_MAP = {
+    'pre-tbody':     'pre-badge',
+    'rs-in-tbody':   'rs-in-badge',
+    'rs-out-tbody':  'rs-out-badge',
+    'rps-in-tbody':  'rps-in-badge',
+    'rps-out-tbody': 'rps-out-badge',
+  };
+
+  const EMPTY_MAP = {
+    'pre-tbody':     'pre-empty',
+    'rs-in-tbody':   'rs-in-empty',
+    'rs-out-tbody':  'rs-out-empty',
+    'rps-in-tbody':  'rps-in-empty',
+    'rps-out-tbody': 'rps-out-empty',
+  };
+
   function updateCounts() {
-    const inside  = document.querySelectorAll('#inside-tbody tr').length;
-    const outside = document.querySelectorAll('#outside-tbody tr').length;
+    let total = 0;
+    ACTIVE_TBODIES.forEach(id => {
+      const n = document.querySelectorAll(`#${id} tr`).length;
+      total += n;
+      const b = BADGE_MAP[id]; if (b) document.getElementById(b).textContent = n;
+      const e = EMPTY_MAP[id]; if (e) document.getElementById(e).style.display = n ? 'none' : 'block';
+    });
     const removed = document.querySelectorAll('#removed-tbody tr').length;
-    const total   = inside + outside;
-
-    document.getElementById('inside-badge').textContent  = inside;
-    document.getElementById('outside-badge').textContent = outside;
-    document.getElementById('row-count').textContent = total + ' row' + (total !== 1 ? 's' : '');
-
-    document.getElementById('removed-badge').textContent  = removed;
+    document.getElementById('total-count').textContent = total + ' active row' + (total !== 1 ? 's' : '');
+    document.getElementById('removed-badge').textContent = removed;
     document.getElementById('removed-card').style.display = removed ? 'block' : 'none';
     document.getElementById('restore-all-btn').style.display = removed ? 'inline-flex' : 'none';
-
-    document.getElementById('inside-empty').style.display  = inside  ? 'none' : 'block';
-    document.getElementById('outside-empty').style.display = outside ? 'none' : 'block';
   }
 
   function removeRow(btn, tbodyId) {
     const tr    = btn.closest('tr');
     const clone = tr.cloneNode(true);
-    const isInside = tr.dataset.inside === '1';
 
-    // Add In/Out cell + restore button
+    // Insert bin label cell before action cell
     const actionCell = clone.querySelector('td:last-child');
-    const inoutCell  = clone.querySelector('td:nth-last-child(2)');
-    if (!inoutCell || !inoutCell.querySelector('.tag')) {
-      // insert in/out cell before action cell
-      const cell = document.createElement('td');
-      cell.innerHTML = `<span class="tag ${isInside ? 'tag-inside' : 'tag-outside'}">${isInside ? 'Inside' : 'Outside'}</span>`;
-      clone.insertBefore(cell, actionCell);
-    }
+    const binKey = tr.closest('tbody').id.replace('-tbody', '').replace(/-(.)/g, (_, c) => '_' + c);
+    const cell = document.createElement('td');
+    const binLabel = BIN_LABEL[Object.keys(BIN_TBODY).find(k => BIN_TBODY[k] === tbodyId)] || '';
+    cell.innerHTML = `<span style="font-size:.75rem;color:#6b7a6b">${binLabel}</span>`;
+    clone.insertBefore(cell, actionCell);
+
     actionCell.innerHTML = `<button class="restore-btn" onclick="restoreRow(this, '${tbodyId}')">↩ Restore</button>`;
     clone.dataset.origin = tbodyId;
 
@@ -367,16 +452,14 @@
     updateCounts();
   }
 
-  function restoreRow(btn) {
+  function restoreRow(btn, tbodyId) {
     const tr     = btn.closest('tr');
-    const origin = tr.dataset.origin;
+    const origin = tbodyId || tr.dataset.origin;
     const clone  = tr.cloneNode(true);
 
-    // Remove the In/Out cell that was added on removal
-    const cells = clone.querySelectorAll('td');
-    // Find and remove the tag cell (second-to-last before action cell)
-    for (let c of cells) {
-      if (c.querySelector('.tag') && !c.querySelector('button')) {
+    // Remove the bin-label cell added on removal
+    for (let c of clone.querySelectorAll('td')) {
+      if (!c.querySelector('button') && c.querySelector('span') && !c.querySelector('.count-badge')) {
         c.remove(); break;
       }
     }
@@ -390,80 +473,55 @@
   }
 
   function restoreAll() {
-    document.querySelectorAll('#removed-tbody tr').forEach(tr => {
-      restoreRow(tr.querySelector('.restore-btn'));
+    // Snapshot first; restoreRow mutates the NodeList
+    [...document.querySelectorAll('#removed-tbody tr')].forEach(tr => {
+      restoreRow(tr.querySelector('.restore-btn'), tr.dataset.origin);
     });
   }
 
   function addFromExtra(btn) {
-    const tr      = btn.closest('tr');
-    const clone   = tr.cloneNode(true);
-    const isInside = tr.dataset.inside === '1';
-    const target  = isInside ? 'inside-tbody' : 'outside-tbody';
+    const tr       = btn.closest('tr');
+    const binKey   = tr.dataset.primaryBin;
+    const tbodyId  = BIN_TBODY[binKey] || 'pre-tbody';
+    const clone    = tr.cloneNode(true);
 
-    // Remove the In/Out cell (extra table has it; main tables don't)
-    for (let c of clone.querySelectorAll('td')) {
-      if (c.querySelector('.tag') && !c.querySelector('button')) { c.remove(); break; }
+    // Remove bin / action cells not present in main tables
+    const cells = [...clone.querySelectorAll('td')];
+    // Last cell becomes remove btn; second-to-last (if it exists and isn't data) may be bin label
+    const actionCell = clone.querySelector('td:last-child');
+    actionCell.innerHTML = `<button class="remove-btn" title="Remove" onclick="removeRow(this, '${tbodyId}')">✕</button>`;
+
+    // Add missing count-badge cell if needed (extras don't have it)
+    const hasCount = clone.querySelector('.count-badge');
+    if (!hasCount) {
+      const cc = document.createElement('td');
+      cc.className = 'count-cell';
+      cc.innerHTML = `<span class="count-badge count-1">1</span>`;
+      clone.insertBefore(cc, actionCell);
     }
 
-    const actionCell = clone.querySelector('td:last-child');
-    actionCell.innerHTML = `<button class="remove-btn" title="Remove" onclick="removeRow(this, '${target}')">✕</button>`;
+    // bin_count data attribute
+    clone.dataset.binCount = clone.dataset.binCount || '1';
 
-    document.getElementById(target).appendChild(clone);
+    document.getElementById(tbodyId).appendChild(clone);
     tr.style.opacity = '0.35';
     btn.textContent = '✓ Added';
     btn.disabled = true;
     updateCounts();
   }
 
-  const ROOTSHIELD_GENERA = new Set([
-    'salvia','rhus','diplacus','ceanothus','arctostaphylos','sambucus',
-    'eriogonum','frangula','carpenteria','garrya','lepechinia','adenostoma',
-    'simmondsia','comarostaphylos','dendromecon','calycanthus','iris',
-    'trichostema','umbellularia', 'sisyrinchium'
-  ]);
-
-  function _matchesGenus(species) {
-    const genus = (species || '').trim().split(/\s+/)[0].toLowerCase();
-    return ROOTSHIELD_GENERA.has(genus);
-  }
-
-  function exportRootshieldCSV() {
-    const lines = ['Location,Species,Size,Qty,Week Shifted,Inside/Outside'];
-    ['inside-tbody', 'outside-tbody'].forEach(id => {
-      const label = id === 'inside-tbody' ? 'Inside' : 'Outside';
-      document.querySelectorAll(`#${id} tr`).forEach(tr => {
-        if (!_matchesGenus(tr.dataset.species)) return;
-        const d = tr.dataset;
-        const e = v => '"' + (v || '').replace(/"/g, '""') + '"';
-        lines.push([d.location, d.species, d.size, d.qty, d.week, label].map(e).join(','));
-      });
+  function exportBinCSV(tbodyId, filename) {
+    const lines = ['Location,Species,Size,Qty,Week Shifted,Legal Code'];
+    document.querySelectorAll(`#${tbodyId} tr`).forEach(tr => {
+      const d = tr.dataset;
+      const e = v => '"' + (v || '').replace(/"/g, '""') + '"';
+      lines.push([d.location, d.species, d.size, d.qty, d.week, d.legal].map(e).join(','));
     });
-    if (lines.length === 1) {
-      alert('No Rootshield/Fertilizer genera found in the current list.');
-      return;
-    }
+    if (lines.length === 1) { alert('No rows to export.'); return; }
     const blob = new Blob([lines.join('\r\n')], { type: 'text/csv' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
-    a.href = url; a.download = 'rootshield_fertilizer_list.csv'; a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function exportCSV() {
-    const lines = ['Location,Species,Size,Qty,Week Shifted,Inside/Outside'];
-    ['inside-tbody', 'outside-tbody'].forEach(id => {
-      const label = id === 'inside-tbody' ? 'Inside' : 'Outside';
-      document.querySelectorAll(`#${id} tr`).forEach(tr => {
-        const d = tr.dataset;
-        const e = v => '"' + (v || '').replace(/"/g, '""') + '"';
-        lines.push([d.location, d.species, d.size, d.qty, d.week, label].map(e).join(','));
-      });
-    });
-    const blob = new Blob([lines.join('\r\n')], { type: 'text/csv' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = 'pre_emergent_list.csv'; a.click();
+    a.href = url; a.download = filename; a.click();
     URL.revokeObjectURL(url);
   }
 
