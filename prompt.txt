@@ -1,0 +1,34 @@
+*** Automated pre-emergent list ***
+
+
+This prompt details the ideas necessary to create an automated list to see
+what's due for application of pre-emergent. 
+
+Inputs:
+	- Inventory with plant name, location, date created, size, etc.
+
+Outputs: 
+	- CSV with columns; Location, species, size, qty, shifted week
+
+We will take in an inventory and look at columns labeled species, size, qty,
+locations, date created, and crop code. Then the code will read these and find
+which sizes are greater than 1G (1G, 5G, 15G, ...), and then sort them based
+on the last date created (most recent creation date showing up first). 
+
+The sort will cut off after 3 weeks of the most current week. That is, if
+we're in week 24 of 2026, the list should cut off at week 21. All plants will
+show up in this ordered list, and then a for loop will be created which adds
+rows to a dictionary. Each row should include that plant's listed location,
+species name, size, quantity, and week shifted. This week shifted will ALWAYS
+be the last four digits of the crop code given in the inventory. 
+
+Then, a csv will be constructed that gives the user all of this information in
+a way that can readily be printed. Note that it's helpful to have these listed
+in a route optimized way so that the pesticide technician can be efficient
+with his time - so this code should also use the route_plugin.py function to
+be attached in the github repo. 
+
+This will be a tool available as a website so that anyone can use it. The site
+will be hosted by Railway and should have a nice interface. This will be the
+one stop shop for any plant applications later on, so add flexibility for
+additional functions. 
