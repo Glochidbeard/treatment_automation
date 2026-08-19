@@ -285,13 +285,8 @@ def process_inventory(df, from_key, to_key):
     )
 
     for frame in (in_range, out_of_range, excluded):
-        cc_week = frame["crop_code"].apply(_week_shifted) \
+        frame["week_shifted"] = frame["crop_code"].apply(_week_shifted) \
             if "crop_code" in frame.columns else pd.Series("", index=frame.index)
-        if "date_parsed" in frame.columns:
-            dt_week = frame["date_parsed"].apply(_date_week_str)
-            frame["week_shifted"] = dt_week.where(dt_week.notna(), cc_week)
-        else:
-            frame["week_shifted"] = cc_week
         frame["inside"]     = frame["location"].apply(_is_inside)
         frame["legal_code"] = frame["location"].apply(_legal_code)
 
