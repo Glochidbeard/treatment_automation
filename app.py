@@ -31,6 +31,8 @@ SENSITIVE_GENERA: set = set()
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _normalize_loc(s):
+    if not isinstance(s, str):
+        return ""
     s = re.sub(r"\s*>\s*", ">", s.strip())
     parts = s.split(">")
     out = []
