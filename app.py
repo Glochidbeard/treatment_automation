@@ -73,6 +73,17 @@ def _week_shifted(crop_code):
     return digits[-4:] if len(digits) >= 4 else digits
 
 
+def _date_week_str(dt):
+    """Return WWZZ string from a parsed date, or None if NaT/NaN."""
+    try:
+        if pd.isna(dt):
+            return None
+    except Exception:
+        return None
+    iso = dt.isocalendar()
+    return f"{iso[1]:02d}{str(iso[0])[-2:]}"
+
+
 def _crop_code_week_key(crop_code):
     if not isinstance(crop_code, str):
         return None
@@ -274,8 +285,13 @@ def process_inventory(df, from_key, to_key):
     )
 
     for frame in (in_range, out_of_range, excluded):
-        frame["week_shifted"] = frame.get("crop_code", pd.Series(dtype=str)).apply(_week_shifted) \
-            if "crop_code" in frame.columns else ""
+        cc_week = frame["crop_code"].apply(_week_shifted) \
+            if "crop_code" in frame.columns else pd.Series("", index=frame.index)
+        if "date_parsed" in frame.columns:
+            dt_week = frame["date_parsed"].apply(_date_week_str)
+            frame["week_shifted"] = dt_week.where(dt_week.notna(), cc_week)
+        else:
+            frame["week_shifted"] = cc_week
         frame["inside"]     = frame["location"].apply(_is_inside)
         frame["legal_code"] = frame["location"].apply(_legal_code)
 
