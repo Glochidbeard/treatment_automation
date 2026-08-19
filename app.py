@@ -380,23 +380,30 @@ def process():
                                week_options=options,
                                default_from=default_from, default_to=default_to)
 
-    # Build per-bin dataframes with route optimization
-    opt_errors  = []
-    total_time  = 0
-    bin_rows    = {}
-    for bk in ACTIVE_BINS:
-        bdf = in_range[in_range["bins"].apply(lambda b: bk in b)].copy()
-        bdf, t, errs = route_order(bdf)
-        opt_errors.extend(errs)
-        if t:
-            total_time += t
-        bin_rows[bk] = build_rows(bdf)
+    try:
+        # Build per-bin dataframes with route optimization
+        opt_errors  = []
+        total_time  = 0
+        bin_rows    = {}
+        for bk in ACTIVE_BINS:
+            bdf = in_range[in_range["bins"].apply(lambda b: bk in b)].copy()
+            bdf, t, errs = route_order(bdf)
+            opt_errors.extend(errs)
+            if t:
+                total_time += t
+            bin_rows[bk] = build_rows(bdf)
 
-    banned_rows = build_rows(
-        in_range[in_range["bins"].apply(lambda b: BIN_BANNED in b)].copy()
-    )
-    extra_rows  = build_rows(out_of_range, include_primary_bin=True)
-    extra_rows += build_rows(excluded)   # no valid size — no Add button
+        banned_rows = build_rows(
+            in_range[in_range["bins"].apply(lambda b: BIN_BANNED in b)].copy()
+        )
+        extra_rows  = build_rows(out_of_range, include_primary_bin=True)
+        extra_rows += build_rows(excluded)
+    except Exception as e:
+        import traceback
+        return render_template("index.html",
+                               error=f"Build error: {e} — {traceback.format_exc()}",
+                               week_options=options,
+                               default_from=default_from, default_to=default_to)
 
     def wlabel(k):
         return f"W{k[1]:02d}-{str(k[0])[-2:]}"
