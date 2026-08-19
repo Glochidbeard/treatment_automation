@@ -432,6 +432,20 @@
     document.getElementById('restore-all-btn').style.display = removed ? 'inline-flex' : 'none';
   }
 
+  function adjustSiblingCounts(rowId, delta) {
+    ACTIVE_TBODIES.forEach(id => {
+      document.querySelectorAll(`#${id} tr[data-row-id="${rowId}"]`).forEach(tr => {
+        const n = Math.max(0, parseInt(tr.dataset.binCount || '0') + delta);
+        tr.dataset.binCount = n;
+        const badge = tr.querySelector('.count-badge');
+        if (badge) {
+          badge.textContent = n;
+          badge.className = 'count-badge ' + (n > 1 ? 'count-multi' : 'count-1');
+        }
+      });
+    });
+  }
+
   function removeRow(btn, tbodyId) {
     const tr    = btn.closest('tr');
     const clone = tr.cloneNode(true);
@@ -448,6 +462,7 @@
     clone.dataset.origin = tbodyId;
 
     document.getElementById('removed-tbody').appendChild(clone);
+    adjustSiblingCounts(tr.dataset.rowId, -1);
     tr.remove();
     updateCounts();
   }
@@ -468,6 +483,7 @@
     actionCell.innerHTML = `<button class="remove-btn" title="Remove" onclick="removeRow(this, '${origin}')">✕</button>`;
 
     document.getElementById(origin).appendChild(clone);
+    adjustSiblingCounts(clone.dataset.rowId, +1);
     tr.remove();
     updateCounts();
   }
