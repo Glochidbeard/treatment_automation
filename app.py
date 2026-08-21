@@ -23,9 +23,13 @@ BIN_RPS_OUT = "rps_out"      # rootshield+seaweed outside (B3-6 any + outside li
 
 ACTIVE_BINS = [BIN_PRE, BIN_RS_IN, BIN_RS_OUT, BIN_RPS_IN, BIN_RPS_OUT]
 
-# Sensitive species → Rootshield Outside for large containers.
-# Future work: drive this from a database.
-SENSITIVE_GENERA: set = set()
+# Sensitive genera → Rootshield Outside regardless of container size.
+SENSITIVE_GENERA = {
+    "salvia", "rhus", "diplacus", "ceanothus", "arctostaphylos",
+    "sambucus", "eriogonum", "frangula", "carpenteria", "garrya",
+    "lepechinia", "adenostoma", "simmondsia", "comarostaphylos",
+    "dendromecon", "calycanthus", "iris", "trichostema", "umbellularia",
+}
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -142,15 +146,19 @@ def _assign_bins(location, is_liner, is_large, species):
     section, row = _section_row(location)
     bins = set()
 
+    genus = (species or "").strip().split()[0].lower() if species else ""
+
     # Pre-emergent: large containers (≥1G) only
     if is_large:
         if _is_inside(location):
             bins.add(BIN_BANNED)
         else:
             bins.add(BIN_PRE)
-            genus = (species or "").strip().split()[0].lower() if species else ""
-            if genus in SENSITIVE_GENERA:
-                bins.add(BIN_RS_OUT)
+
+    # Sensitive genera → Rootshield Outside regardless of container size,
+    # as long as the plant is in an outside location and in the date window.
+    if genus in SENSITIVE_GENERA and not _is_inside(location):
+        bins.add(BIN_RS_OUT)
 
     # Rootshield / RPS: liner sizes
     if is_liner:
