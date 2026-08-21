@@ -155,10 +155,17 @@ def _assign_bins(location, is_liner, is_large, species):
         else:
             bins.add(BIN_PRE)
 
-    # Sensitive genera → Rootshield Outside regardless of container size,
-    # as long as the plant is in an outside location and in the date window.
-    if genus in SENSITIVE_GENERA and not _is_inside(location):
-        bins.add(BIN_RS_OUT)
+    # Sensitive genera → Rootshield (inside or outside) regardless of container size.
+    if genus in SENSITIVE_GENERA:
+        in_rs_zone = bool(
+            (section == "F" and row is not None and (1 <= row <= 5 or 7 <= row <= 10)) or
+            (section == "A" and row is not None and 3 <= row <= 5) or
+            (section == "B" and row is not None and 1 <= row <= 2)
+        )
+        if in_rs_zone:
+            bins.add(BIN_RS_IN)
+        else:
+            bins.add(BIN_RS_OUT)
 
     # Rootshield / RPS: liner sizes
     if is_liner:
