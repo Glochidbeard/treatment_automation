@@ -8,7 +8,6 @@ import pandas as pd
 from flask import Flask, render_template, request
 
 sys.path.insert(0, os.path.dirname(__file__))
-from opt_plugin import optimize
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
@@ -313,20 +312,21 @@ def route_order(df):
         return df, None, []
     df = df.copy()
     df["loc_norm"] = df["location"].apply(_normalize_loc)
-    seen = []
-    for loc in df["loc_norm"]:
-        if loc not in seen:
-            seen.append(loc)
-    stops = ["Offices"] + seen + ["Offices"]
-    try:
-        ordered, total_time, errors = optimize(stops, vehicle="cart_walk")
-    except Exception as e:
-        df.drop(columns=["loc_norm"], inplace=True)
-        return df, None, [str(e)]
-    order_map = {loc: i for i, loc in enumerate(ordered)}
-    df["_order"] = df["loc_norm"].map(lambda l: order_map.get(l, len(ordered)))
+    def _loc_sort_key(loc):
+        parts = loc.split(">")
+        section = parts[0] if parts else ""
+        try:
+            row = int(parts[1]) if len(parts) > 1 else 0
+        except ValueError:
+            row = 0
+        try:
+            bed = int(parts[2]) if len(parts) > 2 else 0
+        except ValueError:
+            bed = 0
+        return (section, row, bed)
+    df["_order"] = df["loc_norm"].map(_loc_sort_key)
     df = df.sort_values("_order").drop(columns=["_order", "loc_norm"])
-    return df, total_time, errors
+    return df, None, []
 
 
 def build_rows(df, include_primary_bin=False):
