@@ -424,8 +424,7 @@ def process():
         banned_rows = build_rows(
             in_range[in_range["bins"].apply(lambda b: BIN_BANNED in b)].copy()
         )
-        extra_rows  = build_rows(out_of_range, include_primary_bin=True)
-        extra_rows += build_rows(excluded)
+        extra_count = len(out_of_range) + len(excluded)
     except Exception as e:
         import traceback
         return render_template("index.html",
@@ -448,7 +447,7 @@ def process():
         rs_out_rows  = bin_rows[BIN_RS_OUT],
         rps_in_rows  = bin_rows[BIN_RPS_IN],
         rps_out_rows = bin_rows[BIN_RPS_OUT],
-        extra_rows   = extra_rows,
+        extra_count  = extra_count,
         opt_errors   = opt_errors,
     )
 

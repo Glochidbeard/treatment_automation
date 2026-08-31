@@ -340,46 +340,12 @@
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════════════
-     EXTRAS (outside date window)
+     EXTRAS (outside date window) — count only, rows not rendered
      ════════════════════════════════════════════════════════════════════════ -->
-{% if extra_rows %}
-<details>
-  <summary>
-    Additional items (outside selected range or unrecognised size)
-    <span class="badge" style="background:#e8f0e8;color:#2d6a2d;margin-left:.25rem">{{ extra_rows|length }}</span>
-  </summary>
-  <div class="card" style="margin-top:.75rem">
-    <table>
-      <thead>
-        <tr><th>Location</th><th>Species</th><th>Size</th><th>Qty</th><th>Week</th><th>Legal</th><th></th></tr>
-      </thead>
-      <tbody>
-        {% for row in extra_rows %}
-        <tr data-row-id="{{ row.row_id }}"
-            data-location="{{ row.location }}"
-            data-species="{{ row.species }}"
-            data-size="{{ row.size }}"
-            data-qty="{{ row.qty }}"
-            data-week="{{ row.week_shifted }}"
-            data-legal="{{ row.legal_code }}"
-            data-primary-bin="{{ row.primary_bin if row.primary_bin is defined else '' }}">
-          <td class="location">{{ row.location }}</td>
-          <td class="species">{{ row.species }}</td>
-          <td>{{ row.size }}</td>
-          <td class="qty">{{ row.qty }}</td>
-          <td class="week">{{ row.week_shifted }}</td>
-          <td class="legal">{{ row.legal_code }}</td>
-          <td>
-            {% if row.primary_bin is defined and row.primary_bin %}
-            <button class="restore-btn" onclick="addFromExtra(this)">+ Add</button>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</details>
+{% if extra_count %}
+<p style="color:#666;font-size:.85rem;margin:.5rem 0">
+  {{ extra_count }} additional item{{ 's' if extra_count != 1 else '' }} outside the selected date range (not shown).
+</p>
 {% endif %}
 
 <script>
